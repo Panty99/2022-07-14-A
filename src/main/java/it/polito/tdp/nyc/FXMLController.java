@@ -1,7 +1,10 @@
 package it.polito.tdp.nyc;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.nyc.model.Arco;
 import it.polito.tdp.nyc.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,19 +35,19 @@ public class FXMLController {
     private Button btnCreaLista; // Value injected by FXMLLoader
 
     @FXML // fx:id="clPeso"
-    private TableColumn<?, ?> clPeso; // Value injected by FXMLLoader
+    private TableColumn<Arco, Integer> clPeso; // Value injected by FXMLLoader
 
     @FXML // fx:id="clV1"
-    private TableColumn<?, ?> clV1; // Value injected by FXMLLoader
+    private TableColumn<Arco, String> clV1; // Value injected by FXMLLoader
 
     @FXML // fx:id="clV2"
-    private TableColumn<?, ?> clV2; // Value injected by FXMLLoader
+    private TableColumn<Arco, String> clV2; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbBorough"
-    private ComboBox<?> cmbBorough; // Value injected by FXMLLoader
+    private ComboBox<String> cmbBorough; // Value injected by FXMLLoader
 
     @FXML // fx:id="tblArchi"
-    private TableView<?> tblArchi; // Value injected by FXMLLoader
+    private TableView<Arco> tblArchi; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtDurata"
     private TextField txtDurata; // Value injected by FXMLLoader
@@ -54,9 +57,21 @@ public class FXMLController {
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
+    
+    private boolean grafoCreato = false;
 
     @FXML
     void doAnalisiArchi(ActionEvent event) {
+    	
+    	if(!this.grafoCreato) {
+    		txtResult.appendText("Devi prima creare il grafo\n");
+    		return ;
+    	}
+    	
+    	List<Arco> archi = this.model.analisi();
+    	for(Arco a: archi) {
+    		txtResult.appendText(a +"\n");
+    	}
     	
 
     }
@@ -64,6 +79,19 @@ public class FXMLController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	
+    	String borgo = cmbBorough.getValue();
+    	if(borgo == null) {
+    		txtResult.setText("Devi inserire un borgo");
+    		return;
+    	}
+    	
+    	// CREAZIONE GRAFO
+    	
+    	model.creaGrafo(borgo);
+    	
+    	this.txtResult.setText("grafo creato!# Vertici: " + this.model.listVertici().size() + "\n# Archi: " + this.model.listArchi().size() + "\n\n");
+    	
+    	this.grafoCreato = true;
     }
 
     @FXML
@@ -90,6 +118,14 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	List<String> borgo = model.getBorgo();
+    	cmbBorough.getItems().clear();
+    	for(String s: borgo) {
+    		cmbBorough.getItems().add(s);
+    	}
+    	
+    	
     }
 
 }
